@@ -1,66 +1,80 @@
 {% extends "base.html" %}
 
-{% block title %}Catálogo · BiblioTech{% endblock %}
+{% block title %}Catálogo · Libroteca{% endblock %}
 
 {% block content %}
 <section class="page-head">
   <div class="page-head-text">
     <h1>Catálogo de libros</h1>
-    <p>
-      {% if search %}
-        Resultados para «<strong>{{ search }}</strong>»
-        · <a class="cta-link" href="{{ url_for('web.index') }}">ver catálogo completo</a>
-      {% else %}
-        {{ books|length }} libro{{ 's' if books|length != 1 else '' }} en la biblioteca
-      {% endif %}
-    </p>
+    {% if search %}
+      <p>Resultados para «<strong>{{ search }}</strong>» ·
+        <a class="cta-link" href="{{ url_for('web.index') }}">ver catálogo completo</a>
+      </p>
+    {% else %}
+      <p>
+        {{ books|length }} libro{{ 's' if books|length != 1 else '' }} en la biblioteca ·
+        <span data-fav-count>{{ fav_count }}</span>
+        favorito{{ 's' if fav_count != 1 else '' }}
+      </p>
+    {% endif %}
   </div>
   <a class="btn btn--primary" href="{{ url_for('web.add_book') }}">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Agregar libro
   </a>
 </section>
-
-<form class="search-bar" method="get" action="{{ url_for('web.index') }}" role="search">
-  <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-  </svg>
-  <input
-    type="search"
-    name="q"
-    value="{{ search }}"
-    placeholder="Buscar por título, autor o género…"
-    aria-label="Buscar libros"
-  >
-  <button type="submit" class="btn btn--primary btn--sm">Buscar</button>
-  {% if search %}
-    <a class="btn btn--ghost btn--sm" href="{{ url_for('web.index') }}">Limpiar</a>
-  {% endif %}
-</form>
 
 {% if books %}
 <div class="book-grid">
   {% for book in books %}
   <article class="book-card">
-    <div class="book-card-top">
-      <div class="book-spine book-spine--{{ loop.index % 6 }}"></div>
-      <div class="book-card-body">
+    <a class="book-card-main" href="{{ url_for('web.book_detail', book_id=book['id']) }}" title="Ver detalle de {{ book['titulo'] }}">
+      <div class="book-cover book-cover--{{ loop.index0 % 6 }}">
+        {% set cover_url = book['imagen']|image_url %}
+        {% if cover_url %}
+          <img class="book-cover-img"
+               src="{{ cover_url }}"
+               alt="Portada de {{ book['titulo'] }}"
+               loading="lazy"
+               onerror="this.onerror=null;this.classList.add('is-broken');">
+        {% endif %}
+        <div class="book-cover-fallback">
+          <span class="book-cover-initials">{{ initials(book['autor']) }}</span>
+          <span class="book-cover-title">{{ book['titulo'] }}</span>
+        </div>
         <span class="book-genre">{{ book['genero'] }}</span>
+      </div>
+      <div class="book-card-body">
         <h3 class="book-title">{{ book['titulo'] }}</h3>
         <p class="book-author">por {{ book['autor'] }}</p>
+        {% if book['descripcion'] %}
+          <p class="book-excerpt">{{ book['descripcion']|truncate(110, True) }}</p>
+        {% endif %}
       </div>
-    </div>
+    </a>
     <div class="book-card-foot">
       <span class="book-year">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         {{ book['anio_publicacion'] }}
       </span>
+      <form method="post" action="{{ url_for('web.like_book', book_id=book['id']) }}" data-like="{{ book['id'] }}">
+        <button type="submit"
+                class="like-btn {{ 'like-btn--on' if book['favorito'] else '' }}"
+                aria-pressed="{{ 'true' if book['favorito'] else 'false' }}"
+                aria-label="{{ 'Quitar de favoritos' if book['favorito'] else 'Agregar a favoritos' }}: {{ book['titulo'] }}"
+                title="{{ 'Quitar de favoritos' if book['favorito'] else 'Agregar a favoritos' }}">
+          <svg class="like-heart {{ 'like-heart--on' if book['favorito'] else '' }}" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23c.29-.29.57-.57.91-.95l1.06-1.05 6.87-6.86 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="like-text">{{ 'Favorito' if book['favorito'] else 'Me gusta' }}</span>
+        </button>
+      </form>
       <div class="book-actions">
-        <a class="btn btn--icon btn--edit" href="{{ url_for('web.edit_book', book_id=book['id']) }}" aria-label="Editar «{{ book['titulo'] }}»" title="Editar">
+        <a class="btn btn--icon btn--edit" href="{{ url_for('web.edit_book', book_id=book['id']) }}" aria-label="Editar {{ book['titulo'] }}" title="Editar">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </a>
         <form method="post" action="{{ url_for('web.delete_book', book_id=book['id']) }}" data-confirm="¿Eliminar «{{ book['titulo'] }}»?">
-          <button class="btn btn--icon btn--delete" aria-label="Eliminar «{{ book['titulo'] }}»" title="Eliminar">
+          <button class="btn btn--icon btn--delete" aria-label="Eliminar {{ book['titulo'] }}" title="Eliminar">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
         </form>
@@ -71,7 +85,7 @@
 </div>
 {% else %}
 <div class="empty-state">
-  <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
     <path d="M9 8h6M9 12h6"/>

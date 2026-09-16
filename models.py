@@ -19,7 +19,10 @@ def init_db():
                 titulo TEXT NOT NULL,
                 autor TEXT NOT NULL,
                 genero TEXT NOT NULL,
-                anio_publicacion INTEGER NOT NULL
+                anio_publicacion INTEGER NOT NULL,
+                descripcion TEXT NOT NULL DEFAULT '',
+                imagen TEXT NOT NULL DEFAULT '',
+                favorito INTEGER NOT NULL DEFAULT 0
             )
             """
         )
@@ -33,10 +36,10 @@ def list_books(search=None):
         rows = conn.execute(
             """
             SELECT * FROM libros
-            WHERE titulo LIKE ? OR autor LIKE ? OR genero LIKE ?
+            WHERE titulo LIKE ? OR autor LIKE ? OR genero LIKE ? OR descripcion LIKE ?
             ORDER BY titulo COLLATE NOCASE
             """,
-            (like, like, like),
+            (like, like, like, like),
         ).fetchall()
     else:
         rows = conn.execute(
@@ -55,30 +58,31 @@ def get_book(book_id):
     return row
 
 
-def add_book(titulo, autor, genero, anio):
+def add_book(titulo, autor, genero, anio, descripcion="", imagen=""):
     conn = connect()
     with conn:
         cur = conn.execute(
             """
-            INSERT INTO libros (titulo, autor, genero, anio_publicacion)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO libros (titulo, autor, genero, anio_publicacion, descripcion, imagen)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (titulo, autor, genero, anio),
+            (titulo, autor, genero, anio, descripcion, imagen),
         )
     conn.close()
     return cur.lastrowid
 
 
-def update_book(book_id, titulo, autor, genero, anio):
+def update_book(book_id, titulo, autor, genero, anio, descripcion, imagen):
     conn = connect()
     with conn:
         cur = conn.execute(
             """
             UPDATE libros
-            SET titulo = ?, autor = ?, genero = ?, anio_publicacion = ?
+            SET titulo = ?, autor = ?, genero = ?, anio_publicacion = ?,
+                descripcion = ?, imagen = ?
             WHERE id = ?
             """,
-            (titulo, autor, genero, anio, book_id),
+            (titulo, autor, genero, anio, descripcion, imagen, book_id),
         )
     conn.close()
     return cur.rowcount
@@ -90,3 +94,16 @@ def delete_book(book_id):
         cur = conn.execute("DELETE FROM libros WHERE id = ?", (book_id,))
     conn.close()
     return cur.rowcount
+
+
+def toggle_favorite(book_id):
+    conn = connect()
+    with conn:
+        conn.execute(
+            "UPDATE libros SET favorito = 1 - favorito WHERE id = ?", (book_id,)
+        )
+        value = conn.execute(
+            "SELECT favorito FROM libros WHERE id = ?", (book_id,)
+        ).fetchone()
+    conn.close()
+    return value[0] if value else None

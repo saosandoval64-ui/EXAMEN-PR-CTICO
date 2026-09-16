@@ -16,6 +16,9 @@ def row_to_dict(row):
         "autor": row["autor"],
         "genero": row["genero"],
         "anio_publicacion": row["anio_publicacion"],
+        "descripcion": row["descripcion"],
+        "imagen": row["imagen"],
+        "favorito": bool(row["favorito"]),
     }
 
 
@@ -49,7 +52,12 @@ class BookListResource(Resource):
         except (TypeError, ValueError):
             return {"error": "anio_publicacion debe ser un número entero."}, 400
 
-        book_id = models.add_book(fields["titulo"], fields["autor"], fields["genero"], anio)
+        descripcion = clean(data.get("descripcion")) or ""
+        imagen = clean(data.get("imagen")) or ""
+
+        book_id = models.add_book(
+            fields["titulo"], fields["autor"], fields["genero"], anio, descripcion, imagen
+        )
         return row_to_dict(models.get_book(book_id)), 201
 
 
@@ -78,12 +86,17 @@ class BookResource(Resource):
         else:
             anio = book["anio_publicacion"]
 
+        descripcion = (
+            clean(data.get("descripcion")) if "descripcion" in data else book["descripcion"]
+        )
+        imagen = clean(data.get("imagen")) if "imagen" in data else book["imagen"]
+
         if not all([titulo, autor, genero]):
             return {
                 "error": "Los campos titulo, autor, genero y anio_publicacion son obligatorios."
             }, 400
 
-        models.update_book(book_id, titulo, autor, genero, anio)
+        models.update_book(book_id, titulo, autor, genero, anio, descripcion, imagen)
         return row_to_dict(models.get_book(book_id)), 200
 
     def delete(self, book_id):

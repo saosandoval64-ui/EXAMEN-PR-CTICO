@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Cómo se hizo · Libroteca{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="page-head-text">
+    <h1>Cómo se hizo</h1>
+    <p>Documentación del proceso de desarrollo de Libroteca.</p>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">01</span>
+    <div>
+      <h2>El planteamiento del examen</h2>
+      <p>Lo que pidió la universidad</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <p>El examen práctico de <strong>Desarrollo de Aplicaciones Web</strong> (Tecnológico Universitario Espíritu Santo) pidió construir una aplicación web para gestionar una biblioteca de libros usando <strong>Flask</strong>, <strong>SQLite</strong> y una <strong>API RESTful con Flask-RESTful</strong>, y subirla a GitHub con un README.</p>
+    <div class="requisitos-grid">
+      <div class="check-item"><span class="check-mark">✓</span> Listado de libros (título, autor, género, año)</div>
+      <div class="check-item"><span class="check-mark">✓</span> Búsqueda por título, autor o género</div>
+      <div class="check-item"><span class="check-mark">✓</span> Agregar libros</div>
+      <div class="check-item"><span class="check-mark">✓</span> Actualizar libros</div>
+      <div class="check-item"><span class="check-mark">✓</span> Eliminar libros</div>
+      <div class="check-item"><span class="check-mark">✓</span> GET /api/books</div>
+      <div class="check-item"><span class="check-mark">✓</span> GET /api/books/&lt;id&gt;</div>
+      <div class="check-item"><span class="check-mark">✓</span> POST /api/books</div>
+      <div class="check-item"><span class="check-mark">✓</span> PUT /api/books/&lt;id&gt;</div>
+      <div class="check-item"><span class="check-mark">✓</span> DELETE /api/books/&lt;id&gt;</div>
+      <div class="check-item"><span class="check-mark">✓</span> Base de datos SQLite funcional</div>
+      <div class="check-item"><span class="check-mark">✓</span> README en GitHub + repositorio subido</div>
+    </div>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">02</span>
+    <div>
+      <h2>Tecnologías</h2>
+      <p>El stack elegido</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <div class="tech-chips">
+      <span class="chip">Python 3</span>
+      <span class="chip">Flask</span>
+      <span class="chip">Flask-RESTful</span>
+      <span class="chip">SQLite</span>
+      <span class="chip">Jinja2</span>
+      <span class="chip">HTML5</span>
+      <span class="chip">CSS3</span>
+      <span class="chip">JavaScript</span>
+      <span class="chip">Git &amp; GitHub</span>
+    </div>
+    <p>SQLite no necesita ningún conector extra: el módulo <code>sqlite3</code> viene integrado en Python. La interfaz se maquetó con plantillas <strong>Jinja2</strong> y CSS propio, sin frameworks externos.</p>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">03</span>
+    <div>
+      <h2>Los pasos seguidos</h2>
+      <p>Proceso de implementación</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <ol class="steps-list">
+      <li><strong>Entorno de trabajo:</strong> se creó un entorno virtual e instalaron <code>Flask</code> y <code>Flask-RESTful</code> desde <code>requirements.txt</code>.</li>
+      <li><strong>Estructura del proyecto:</strong> <code>app.py</code>, <code>models.py</code>, <code>routes.py</code>, <code>api.py</code>, <code>templates/</code>, <code>static/</code> y <code>database.db</code>.</li>
+      <li><strong>Modelo y base de datos:</strong> tabla <code>libros</code> con id autoincremental, título, autor, género y año de publicación (a la que añadimos descripción y portada).</li>
+      <li><strong>Rutas web:</strong> listar, buscar, agregar, editar y eliminar libros con mensajes de confirmación.</li>
+      <li><strong>Plantillas HTML:</strong> catálogo con tarjetas, formularios con validación y ficha de detalle por libro.</li>
+      <li><strong>API RESTful:</strong> recursos <code>BookListResource</code> y <code>BookResource</code> con Flask-RESTful, con códigos de estado HTTP correctos (200, 201, 400, 404).</li>
+      <li><strong>Pruebas:</strong> se probaron todos los endpoints con <code>curl</code> y el flujo completo desde la interfaz web.</li>
+      <li><strong>Entrega:</strong> repositorio Git, README con instrucciones y esta documentación.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">04</span>
+    <div>
+      <h2>Decisiones que se agregaron</h2>
+      <p>Más allá de lo pedido</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <div class="decision-grid">
+      <article class="decision-card">
+        <h3>Botón «Me gusta» en cada libro</h3>
+        <p>Un corazón en cada tarjeta y en la ficha de detalle marca el libro como favorito con un solo clic (POST), sin recargar decisiones. El catálogo muestra cuántos libros te gustan y el botón recuerda el estado.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Ficha de detalle con clic</h3>
+        <p>Al hacer clic en una tarjeta se abre una ficha con la portada en grande y un texto explicando el libro. La descripción hace el catálogo más útil y realista.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Portadas de los libros</h3>
+        <p>Cada libro puede tener imagen: se sube un archivo desde la computadora (guardado en <code>static/uploads/</code>) o se pega una URL. Si no hay imagen, se genera una portada automática.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Portadas en los datos de ejemplo</h3>
+        <p>El script <code>seed.py</code> carga 10 libros cuyas portadas viven en <code>static/portadas/</code>, descargadas previamente con nombres legibles, para que el catálogo no inicie vacío y las imágenes no dependan de internet.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Validaciones y seguridad</h3>
+        <p>Se validan campos obligatorios y el año (1000–3000), se restringe el formato de imágenes subidas, los nombres de archivo se aleatorizan y todos los formularios evitan inyección SQL usando consultas parametrizadas.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Experiencia de usuario</h3>
+        <p>Confirmación antes de eliminar, mensajes flash de éxito/error, estados vacíos explicativos, diseño responsivo, tarjetas con buena separación y esquinas menos redondeadas de aspecto editorial.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">05</span>
+    <div>
+      <h2>Estructura del proyecto</h2>
+      <p>Qué hay en cada archivo y cómo se hizo</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <p>Así quedó organizado el proyecto en carpetas y archivos:</p>
+    <pre class="code-block code-tree">biblioteca/
+├── app.py                 # Punto de entrada (crea la app y registra todo)
+├── models.py              # Conexión a SQLite y operaciones de la base de datos
+├── routes.py              # Rutas web (catálogo, CRUD, detalle, proceso)
+├── api.py                 # API RESTful con Flask-RESTful
+├── seed.py                # Carga 10 libros de ejemplo con portada y descripción
+├── requirements.txt       # Dependencias: Flask y Flask-RESTful
+├── database.db            # Base de datos SQLite
+├── README.md              # Instrucciones de instalación y uso
+├── static/
+│   ├── style.css          # Hoja de estilos (diseño de toda la app)
+│   ├── portadas/          # Portadas de los libros de ejemplo (seed.py)
+│   ├── uploads/           # Imágenes subidas desde los formularios
+└── templates/
+    ├── base.html          # Layout base (nav con buscador, mensajes, footer)
+    ├── index.html         # Catálogo de libros (tarjetas)
+    ├── book_detail.html   # Ficha del libro con portada y descripción
+    ├── add_book.html      # Formulario para agregar un libro
+    ├── edit_book.html     # Formulario para editar un libro
+    └── proceso.html       # Esta página ("Cómo se hizo")</pre>
+
+    <table class="doc-table">
+      <thead>
+        <tr><th>Archivo</th><th>Qué hace</th><th>Cómo se hizo</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>app.py</code></td>
+          <td>Crea la app Flask y la pone a funcionar.</td>
+          <td>Se creó la instancia <code>app</code>, se importaron los blueprints <code>routes</code> y <code>api</code>, y se registraron con <code>app.register_blueprint()</code>. También registra un filtro de Jinja que convierte el campo <code>imagen</code> en la dirección completa de la portada.</td>
+        </tr>
+        <tr>
+          <td><code>models.py</code></td>
+          <td>El "puente" entre la app y la base de datos.</td>
+          <td>Cada función abre y cierra su propia conexión <code>sqlite3</code>. Se usa <code>row_factory = sqlite3.Row</code> para leer filas como si fueran diccionarios y <b>consultas parametrizadas</b> (<code>WHERE id = ?</code>) para evitar inyección SQL. <code>init_db()</code> crea la tabla <code>libros</code> si no existe.</td>
+        </tr>
+        <tr>
+          <td><code>routes.py</code></td>
+          <td>Las páginas web que ves en el navegador.</td>
+          <td>Cada vista es una función con el decorador <code>@web_bp.route(...)</code>. Las rutas que envían datos (<code>POST</code>) validan los campos, usan <code>models</code> para guardar y avisan con <code>flash()</code> (mensajes de éxito o error) antes de redirigir. La subida de imágenes se maneja con <code>request.files</code> y se guarda con nombre aleatorio en <code>static/uploads/</code>.</td>
+        </tr>
+        <tr>
+          <td><code>api.py</code></td>
+          <td>Expone la API RESTful bajo <code>/api</code>.</td>
+          <td>Se definieron dos recursos de Flask-RESTful: <code>BookListResource</code> (para la colección) y <code>BookResource</code> (para un libro). Cada método HTTP (<code>get</code>, <code>post</code>, <code>put</code>, <code>delete</code>) devuelve una tupla <code>(datos, código HTTP)</code> y se registran con <code>api.add_resource()</code>.</td>
+        </tr>
+        <tr>
+          <td><code>seed.py</code></td>
+          <td>Carga datos de ejemplo.</td>
+          <td>Una lista de diccionarios con 10 libros (título, autor, género, año, descripción e ISBN para la portada). Un bucle llama a <code>models.add_book()</code> por cada uno, usando la API abierta de Open Library para las portadas.</td>
+        </tr>
+        <tr>
+          <td><code>templates/</code></td>
+          <td>Las vistas en HTML.</td>
+          <td><code>base.html</code> define el layout común (barra de navegación con buscador, mensajes flotantes y pie de página); el resto hereda con <code>&#123;% extends %&#125;</code>. Los formularios usan <code>enctype="multipart/form-data"</code> para poder subir imágenes y tienen una pequeña vista previa en JavaScript.</td>
+        </tr>
+        <tr>
+          <td><code>static/style.css</code></td>
+          <td>Todo el diseño visual.</td>
+          <td>CSS propio, sin frameworks: variables de color, grillas con <code>grid</code>, tarjetas tipo "librero" con portada, esquinas poco redondeadas, buen espaciado entre tarjetas y diseño responsivo para celular. Las portadas subidas quedan en <code>static/uploads/</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">06</span>
+    <div>
+      <h2>Esquema de la base de datos</h2>
+      <p>Tabla <code>libros</code></p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <pre class="code-block">CREATE TABLE IF NOT EXISTS libros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    autor TEXT NOT NULL,
+    genero TEXT NOT NULL,
+    anio_publicacion INTEGER NOT NULL,
+    descripcion TEXT NOT NULL DEFAULT '',
+    imagen TEXT NOT NULL DEFAULT ''
+);</pre>
+    <p class="doc-note">La columna usa <code>anio</code> en lugar de <code>año</code> para evitar problemas con la letra "ñ" en SQLite.</p>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">07</span>
+    <div>
+      <h2>La API RESTful</h2>
+      <p>Qué es, para qué sirve y sus endpoints</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <p>La API es la <strong>interfaz para programadores</strong>: expone los mismos libros que ves en la web, pero en <strong>JSON</strong> (texto estructurado). Es lo que ves si haces clic en el botón <b>API</b> del menú o abres <code>/api/books</code>: no es una página bonita, son los <em>datos</em>.</p>
+
+    <div class="doc-callout">
+      <strong>En resumen:</strong> la web es para personas, la API es para máquinas. Un navegador necesita botones y tarjetas; un programa solo necesita datos ordenados. Ambos comparten la misma base de datos y las mismas operaciones.
+    </div>
+
+    <p>Con la API, cualquier otro programa (una app móvil, un script, otro sitio web) puede hacer lo mismo que tú haces a mano en la interfaz:</p>
+    <ul class="api-uses">
+      <li><code>GET</code> → <b>leer</b> el catálogo completo o un solo libro.</li>
+      <li><code>POST</code> → <b>crear</b> un libro nuevo.</li>
+      <li><code>PUT</code> → <b>actualizar</b> los datos de un libro.</li>
+      <li><code>DELETE</code> → <b>eliminar</b> un libro.</li>
+    </ul>
+    <p>Se puede probar desde la terminal con <code>curl http://127.0.0.1:5000/api/books</code>, y este es uno de los puntos evaluados del examen.</p>
+
+    <p class="api-subtitle">Endpoints disponibles en <code>/api</code>:</p>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Respuesta</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method method--get">GET</span></td><td><code>/api/books</code></td><td>Lista todos los libros</td><td>200</td></tr>
+        <tr><td><span class="method method--get">GET</span></td><td><code>/api/books/?q=texto</code></td><td>Busca por título, autor, género o descripción</td><td>200</td></tr>
+        <tr><td><span class="method method--get">GET</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Obtiene un libro por su id</td><td>200 / 404</td></tr>
+        <tr><td><span class="method method--post">POST</span></td><td><code>/api/books</code></td><td>Crea un libro nuevo</td><td>201 / 400</td></tr>
+        <tr><td><span class="method method--put">PUT</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Actualiza un libro existente</td><td>200 / 400 / 404</td></tr>
+        <tr><td><span class="method method--delete">DELETE</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Elimina un libro</td><td>200 / 404</td></tr>
+      </tbody>
+    </table>
+    <p>Ejemplo de JSON que devuelve la API:</p>
+    <pre class="code-block">{
+    "id": 1,
+    "titulo": "Cien años de soledad",
+    "autor": "Gabriel García Márquez",
+    "genero": "Novela",
+    "anio_publicacion": 1967,
+    "descripcion": "…",
+    "imagen": "portadas/cien-anos-de-soledad.jpg"
+}</pre>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">08</span>
+    <div>
+      <h2>Cómo ejecutar</h2>
+      <p>Del repositorio a la pantalla</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <pre class="code-block"># 1. Entorno virtual
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+
+# 2. Dependencias
+pip install -r requirements.txt
+
+# 3. (Opcional) libros de ejemplo
+python seed.py
+
+# 4. Ejecutar
+python app.py
+
+# 5. Abrir
+# Web:  http://127.0.0.1:5000
+# API:  http://127.0.0.1:5000/api/books</pre>
+    <p class="doc-note">La base de datos <code>database.db</code> se crea sola al iniciar la aplicación por primera vez.</p>
+  </div>
+</section>
+{% endblock %}

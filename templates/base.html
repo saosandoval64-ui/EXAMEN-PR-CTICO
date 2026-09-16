@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}BiblioTech{% endblock %}</title>
+  <title>{% block title %}Libroteca · Tu biblioteca{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -11,18 +11,43 @@
     <div class="container header-inner">
       <a class="brand" href="{{ url_for('web.index') }}">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <path d="M9 7h6M9 11h6M9 15h4"/>
           </svg>
         </span>
-        BiblioTech
+        <span class="brand-text">
+          <strong>Libroteca</strong>
+          <small>Tu biblioteca, organizada</small>
+        </span>
       </a>
-      <nav class="main-nav">
-        <a class="nav-link" href="{{ url_for('web.index') }}">Catálogo</a>
-        <a class="nav-link" href="{{ url_for('web.add_book') }}">Agregar libro</a>
-        <a class="nav-link nav-link-api" href="/api/books" target="_blank" rel="noopener">API</a>
+
+      <form class="nav-search" method="get" action="{{ url_for('web.index') }}" role="search">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" name="q" value="{{ request.args.get('q', '') }}"
+               placeholder="Buscar por título, autor o género…" aria-label="Buscar libros">
+      </form>
+
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="main-nav-drawer" aria-label="Abrir menú">
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </button>
+      <nav id="main-nav-drawer" class="main-nav" aria-label="Navegación principal">
+        <a class="nav-link {{ 'is-active' if request.path == url_for('web.index') }}" href="{{ url_for('web.index') }}">Catálogo</a>
+        <a class="nav-link {{ 'is-active' if request.path == url_for('web.add_book') }}" href="{{ url_for('web.add_book') }}">Agregar libro</a>
+        <a class="nav-link {{ 'is-active' if request.path == url_for('web.proceso') }}" href="{{ url_for('web.proceso') }}">Cómo se hizo</a>
+        <a class="nav-link nav-link-api" href="/api/books" target="_blank" rel="noopener" title="Ver la API RESTful en JSON">
+          API
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
       </nav>
+      <div class="nav-overlay" hidden></div>
     </div>
   </header>
 
@@ -38,7 +63,7 @@
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               {% endif %}
               <span>{{ message }}</span>
-              <button class="flash-close" aria-label="Cerrar">
+              <button class="flash-close" aria-label="Cerrar mensaje">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
@@ -52,20 +77,120 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>BiblioTech · Gestión de biblioteca · Examen práctico de Desarrollo de Aplicaciones Web</p>
+      <div class="footer-grid">
+        <div class="footer-about">
+          <span class="footer-logo">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </span>
+            Libroteca
+          </span>
+          <p>Tu biblioteca personal: cataloga, busca y lleva el registro de todos tus libros en un solo lugar.</p>
+          <p class="footer-tech">
+            <span>Flask</span><span>SQLite</span><span>Flask-RESTful</span><span>CSS</span>
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="{{ url_for('web.index') }}">Catálogo de libros</a></li>
+            <li><a href="{{ url_for('web.add_book') }}">Agregar libro</a></li>
+            <li><a href="{{ url_for('web.proceso') }}">Cómo se hizo</a></li>
+            <li><a href="/api/books" target="_blank" rel="noopener">API (JSON)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Proyecto académico</h4>
+          <p>Examen práctico de Desarrollo de Aplicaciones Web.</p>
+          <p>Tecnológico Universitario Espíritu Santo.</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 <strong>Libroteca</strong> · Gestión de biblioteca</span>
+        <span>API RESTful en <code>/api/books</code></span>
+      </div>
     </div>
   </footer>
 
   <script>
     document.querySelectorAll('.flash-close').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        this.parentElement.style.opacity = '0';
-        setTimeout(() => this.parentElement.remove(), 200);
+        var el = this.parentElement;
+        el.style.opacity = '0';
+        setTimeout(function () { el.remove(); }, 200);
       });
     });
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
       form.addEventListener('submit', function (e) {
         if (!window.confirm(form.dataset.confirm)) e.preventDefault();
+      });
+    });
+
+    /* ---------- Drawer móvil ---------- */
+    var navToggle = document.querySelector('.nav-toggle');
+    var navDrawer = document.querySelector('.main-nav');
+    var navOverlay = document.querySelector('.nav-overlay');
+
+    function setNav(open) {
+      if (!navToggle || !navDrawer) return;
+      navToggle.setAttribute('aria-expanded', String(open));
+      navToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+      navDrawer.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-open', open);
+      if (navOverlay) navOverlay.hidden = !open;
+    }
+
+    if (navToggle) {
+      navToggle.addEventListener('click', function () {
+        setNav(navToggle.getAttribute('aria-expanded') !== 'true');
+      });
+      navDrawer && navDrawer.addEventListener('click', function (e) {
+        if (e.target.closest('a') || e.target.closest('button[type=submit]')) setNav(false);
+      });
+    }
+    if (navOverlay) navOverlay.addEventListener('click', function () { setNav(false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && navToggle && navToggle.getAttribute('aria-expanded') === 'true') setNav(false);
+    });
+    window.matchMedia('(min-width: 721px)').addEventListener('change', function (e) {
+      if (e.matches) setNav(false);
+    });
+
+    document.querySelectorAll('form[data-like]').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type=submit]');
+        var heart = form.querySelector('.like-heart');
+        var text = form.querySelector('.like-text');
+        var liked = btn.classList.contains('like-btn--on') || btn.classList.contains('is-liked');
+        var favCount = document.querySelector('[data-fav-count]');
+
+        fetch(form.action, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+          .then(function (d) {
+            btn.classList.toggle('like-btn--on', d.favorito);
+            btn.classList.toggle('is-liked', d.favorito);
+            btn.classList.toggle('btn--liked', d.favorito);
+            btn.classList.toggle('btn--like-outline', !d.favorito);
+            btn.setAttribute('aria-pressed', String(d.favorito));
+            if (heart) {
+              heart.classList.toggle('like-heart--on', d.favorito);
+              heart.classList.toggle('is-liked', d.favorito);
+            }
+            if (text) text.textContent = d.favorito ? 'Favorito' : 'Me gusta';
+            if (favCount) {
+              var n = parseInt(favCount.textContent, 10) + (d.favorito ? 1 : -1);
+              favCount.textContent = n;
+              favCount.textContent += favCount.textContent.endsWith('1') ? ' favorito' : ' favoritos';
+            }
+          })
+          .catch(function () { form.submit(); });
       });
     });
   </script>

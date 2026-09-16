@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Editar libro · BiblioTech{% endblock %}
+{% block title %}Editar libro · Libroteca{% endblock %}
 
 {% block content %}
 <section class="page-head">
@@ -10,27 +10,38 @@
   </div>
 </section>
 
-<form class="book-form" method="post">
-  <div class="field">
-    <label for="titulo">Título</label>
-    <input type="text" id="titulo" name="titulo" value="{{ book['titulo'] }}" required maxlength="200" autofocus>
-  </div>
+<form class="book-form" method="post" enctype="multipart/form-data">
+  <div class="form-section">
+    <h2 class="form-section-title">Información del libro</h2>
 
-  <div class="field">
-    <label for="autor">Autor</label>
-    <input type="text" id="autor" name="autor" value="{{ book['autor'] }}" required maxlength="200">
-  </div>
+    <div class="field">
+      <label for="titulo">Título</label>
+      <input type="text" id="titulo" name="titulo" value="{{ book['titulo'] }}" required maxlength="200" autofocus>
+    </div>
 
-  <div class="field-row">
+    <div class="field-row">
+      <div class="field">
+        <label for="autor">Autor</label>
+        <input type="text" id="autor" name="autor" value="{{ book['autor'] }}" required maxlength="200">
+      </div>
+
+      <div class="field">
+        <label for="anio_publicacion">Año de publicación</label>
+        <input type="number" id="anio_publicacion" name="anio_publicacion" value="{{ book['anio_publicacion'] }}" required min="1000" max="3000" step="1">
+      </div>
+    </div>
+
     <div class="field">
       <label for="genero">Género</label>
       <input type="text" id="genero" name="genero" value="{{ book['genero'] }}" required maxlength="100" list="generos-sugeridos">
       <datalist id="generos-sugeridos">
         <option value="Novela"></option>
         <option value="Ciencia ficción"></option>
+        <option value="Distopía"></option>
         <option value="Fantasía"></option>
         <option value="Misterio"></option>
         <option value="Terror"></option>
+        <option value="Clásico"></option>
         <option value="Biografía"></option>
         <option value="Historia"></option>
         <option value="Poesía"></option>
@@ -40,9 +51,40 @@
     </div>
 
     <div class="field">
-      <label for="anio_publicacion">Año de publicación</label>
-      <input type="number" id="anio_publicacion" name="anio_publicacion" value="{{ book['anio_publicacion'] }}" required min="1000" max="3000" step="1">
+      <label for="descripcion">Descripción <span class="field-optional">(opcional)</span></label>
+      <textarea id="descripcion" name="descripcion" rows="4" maxlength="1000" placeholder="Un breve texto explicando de qué trata el libro…">{{ book['descripcion'] }}</textarea>
+      <p class="field-hint">Este texto se mostrará en la ficha del libro cuando hagas clic en su tarjeta.</p>
     </div>
+  </div>
+
+  <div class="form-section">
+    <h2 class="form-section-title">Portada del libro</h2>
+
+    {% set current_cover = book['imagen']|image_url %}
+
+    <div class="cover-pick">
+      <div class="cover-preview {{ 'has-image' if current_cover }}" id="cover-preview" aria-hidden="true">
+        {% if current_cover %}
+          <img src="{{ current_cover }}" alt="Portada actual de {{ book['titulo'] }}">
+          <p class="cover-current-note">Portada actual. Sube una nueva o pega otra URL para reemplazarla.</p>
+        {% else %}
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Sin portada actual<br>se generará una automática</span>
+        {% endif %}
+      </div>
+
+      <div class="cover-pick-options">
+        <div class="field">
+          <label for="imagen_file">Subir imagen desde la computadora</label>
+          <input type="file" id="imagen_file" name="imagen_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
+        </div>
+        <div class="field">
+          <label for="imagen_url">O pegar la URL de una imagen</label>
+          <input type="url" id="imagen_url" name="imagen_url" placeholder="https://ejemplo.com/portada.jpg">
+        </div>
+      </div>
+    </div>
+    <p class="field-hint">Deja ambos campos vacíos para conservar la portada actual.</p>
   </div>
 
   <div class="form-actions">
@@ -53,4 +95,26 @@
     <a class="btn btn--ghost" href="{{ url_for('web.index') }}">Cancelar</a>
   </div>
 </form>
+
+<script>
+  (function () {
+    var preview = document.getElementById('cover-preview');
+    var fileInput = document.getElementById('imagen_file');
+    var urlInput = document.getElementById('imagen_url');
+
+    fileInput.addEventListener('change', function () {
+      if (this.files && this.files[0]) {
+        preview.classList.add('has-image');
+        preview.innerHTML = '<img src="' + URL.createObjectURL(this.files[0]) + '" alt="Vista previa de la nueva portada"><p class="cover-current-note">Imagen nueva, se subirá al guardar.</p>';
+      }
+    });
+
+    urlInput.addEventListener('input', function () {
+      if (this.value.trim()) {
+        preview.classList.add('has-image');
+        preview.innerHTML = '<img src="' + this.value + '" alt="Vista previa de la nueva portada"><p class="cover-current-note">Imagen nueva, se guardará al enviar.</p>';
+      }
+    });
+  })();
+</script>
 {% endblock %}
