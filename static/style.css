@@ -101,6 +101,7 @@ img { max-width: 100%; }
   gap: 9px;
   max-width: 340px;
   width: 100%;
+  justify-self: center;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
@@ -1016,17 +1017,24 @@ main.container {
 
 @media (max-width: 720px) {
   .header-inner {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 22px;
     padding-top: 12px;
     padding-bottom: 12px;
   }
-  .brand { flex: 1; min-width: 0; }
   .brand-text strong { font-size: 1.1rem; }
   .brand-text small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .nav-search {
+    width: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    order: 3;
+    max-width: none;
+    justify-self: stretch;
+  }
 
   /* ---- Hamburgesa → X (animada) ---- */
   .nav-toggle {
