@@ -22,6 +22,7 @@ def init_db():
                 anio_publicacion INTEGER NOT NULL,
                 descripcion TEXT NOT NULL DEFAULT '',
                 imagen TEXT NOT NULL DEFAULT '',
+                pdf TEXT NOT NULL DEFAULT '',
                 favorito INTEGER NOT NULL DEFAULT 0
             )
             """
@@ -58,31 +59,31 @@ def get_book(book_id):
     return row
 
 
-def add_book(titulo, autor, genero, anio, descripcion="", imagen=""):
+def add_book(titulo, autor, genero, anio, descripcion="", imagen="", pdf=""):
     conn = connect()
     with conn:
         cur = conn.execute(
             """
-            INSERT INTO libros (titulo, autor, genero, anio_publicacion, descripcion, imagen)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO libros (titulo, autor, genero, anio_publicacion, descripcion, imagen, pdf)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (titulo, autor, genero, anio, descripcion, imagen),
+            (titulo, autor, genero, anio, descripcion, imagen, pdf),
         )
     conn.close()
     return cur.lastrowid
 
 
-def update_book(book_id, titulo, autor, genero, anio, descripcion, imagen):
+def update_book(book_id, titulo, autor, genero, anio, descripcion, imagen, pdf=""):
     conn = connect()
     with conn:
         cur = conn.execute(
             """
             UPDATE libros
             SET titulo = ?, autor = ?, genero = ?, anio_publicacion = ?,
-                descripcion = ?, imagen = ?
+                descripcion = ?, imagen = ?, pdf = ?
             WHERE id = ?
             """,
-            (titulo, autor, genero, anio, descripcion, imagen, book_id),
+            (titulo, autor, genero, anio, descripcion, imagen, pdf, book_id),
         )
     conn.close()
     return cur.rowcount

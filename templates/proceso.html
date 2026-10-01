@@ -144,10 +144,12 @@
 │   ├── style.css          # Hoja de estilos (diseño de toda la app)
 │   ├── portadas/          # Portadas de los libros de ejemplo (seed.py)
 │   ├── uploads/           # Imágenes subidas desde los formularios
+│   └── pdf/               # Archivos PDF subidos por los usuarios
 └── templates/
     ├── base.html          # Layout base (nav con buscador, mensajes, footer)
     ├── index.html         # Catálogo de libros (tarjetas)
     ├── book_detail.html   # Ficha del libro con portada y descripción
+    ├── read_book.html     # Nueva vista para leer libros con PDF
     ├── add_book.html      # Formulario para agregar un libro
     ├── edit_book.html     # Formulario para editar un libro
     └── proceso.html       # Esta página ("Cómo se hizo")</pre>
@@ -243,7 +245,7 @@
     </ul>
     <p>Se puede probar desde la terminal con <code>curl http://127.0.0.1:5000/api/books</code>, y este es uno de los puntos evaluados del examen.</p>
 
-    <p class="api-subtitle">Endpoints disponibles en <code>/api</code>:</p>
+<p class="api-subtitle">Endpoints disponibles en <code>/api</code>:</p>
     <table class="doc-table">
       <thead>
         <tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Respuesta</th></tr>
@@ -251,10 +253,10 @@
       <tbody>
         <tr><td><span class="method method--get">GET</span></td><td><code>/api/books</code></td><td>Lista todos los libros</td><td>200</td></tr>
         <tr><td><span class="method method--get">GET</span></td><td><code>/api/books/?q=texto</code></td><td>Busca por título, autor, género o descripción</td><td>200</td></tr>
-        <tr><td><span class="method method--get">GET</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Obtiene un libro por su id</td><td>200 / 404</td></tr>
+        <tr><td><span class="method method--get">GET</span></td><td><code>/api/books/<id></code></td><td>Obtiene un libro por su id</td><td>200 / 404</td></tr>
         <tr><td><span class="method method--post">POST</span></td><td><code>/api/books</code></td><td>Crea un libro nuevo</td><td>201 / 400</td></tr>
-        <tr><td><span class="method method--put">PUT</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Actualiza un libro existente</td><td>200 / 400 / 404</td></tr>
-        <tr><td><span class="method method--delete">DELETE</span></td><td><code>/api/books/&lt;id&gt;</code></td><td>Elimina un libro</td><td>200 / 404</td></tr>
+        <tr><td><span class="method method--put">PUT</span></td><td><code>/api/books/<id></code></td><td>Actualiza un libro existente</td><td>200 / 400 / 404</td></tr>
+        <tr><td><span class="method method--delete">DELETE</span></td><td><code>/api/books/<id></code></td><td>Elimina un libro</td><td>200 / 404</td></tr>
       </tbody>
     </table>
     <p>Ejemplo de JSON que devuelve la API:</p>
@@ -267,6 +269,36 @@
     "descripcion": "…",
     "imagen": "portadas/cien-anos-de-soledad.jpg"
 }</pre>
+  </div>
+</section>
+
+<section class="doc-section">
+  <div class="doc-section-head">
+    <span class="doc-num">09</span>
+    <div>
+      <h2>Nuevas funcionalidades: Lectura de PDFs</h2>
+      <p>Más allá de lo pedido en el examen</p>
+    </div>
+  </div>
+  <div class="doc-body">
+    <p>Se añadieron las siguientes mejoras al proyecto original:</p>
+    <ol class="steps-list">
+      <li><strong>Subida de PDFs:</strong> en el formulario de agregar/editar libro hay un campo para subir archivos <code>.pdf</code>. Los archivos se guardan en <code>static/pdf/</code> con nombres aleatorios.</li>
+      <li><strong>Página de lectura dedicada:</strong> el botón «Leer libro» de la ficha lleva a una página aparte (<code>/leer/<id></code>) con un visor de PDF integrado mediante <code><iframe></code>, que usa el lector nativo del navegador: las páginas se muestran sin deformarse, con zoom y navegación.</li>
+      <li><strong>Base de datos:</strong> se añadió la columna <code>pdf</code> a la tabla <code>libros</code> para almacenar la ruta del archivo PDF.</li>
+      <li><strong>Estructura de carpetas:</strong> se creó <code>static/pdf/</code> para alojar los PDFs. Los 10 libros de ejemplo incluyen un PDF de varias páginas (portada, «Sobre este libro» y fragmento de muestra) con nombres seguros sin acentos.</li>
+      <li><strong>Diseño responsivo:</strong> el visor adapta su altura a cada pantalla: 720px en PC, 550px en tablet y 420px en móvil.</li>
+    </ol>
+    <div class="decision-grid">
+      <article class="decision-card">
+        <h3>Cómo subir un PDF</h3>
+        <p>En el formulario de agregar o editar libro, busca la sección "Archivo PDF". Haz clic en "Subir PDF desde la computadora" y selecciona un archivo <code>.pdf</code>. El sistema guardará el archivo en <code>static/pdf/</code> y asociará el nombre de archivo a ese libro en la base de datos.</p>
+      </article>
+      <article class="decision-card">
+        <h3>Cómo leer un libro</h3>
+        <p>Desde el catálogo, haz clic en la tarjeta para abrir la ficha de detalle y pulsa el botón «Leer libro». El navegador te lleva a la página de lectura con el PDF cargado y listo para leer, sin descargas automáticas.</p>
+      </article>
+    </div>
   </div>
 </section>
 

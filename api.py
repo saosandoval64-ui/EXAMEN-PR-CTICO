@@ -18,6 +18,7 @@ def row_to_dict(row):
         "anio_publicacion": row["anio_publicacion"],
         "descripcion": row["descripcion"],
         "imagen": row["imagen"],
+        "pdf": row["pdf"],
         "favorito": bool(row["favorito"]),
     }
 

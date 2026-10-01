@@ -15,6 +15,7 @@ SAMPLE_BOOKS = [
             "universal de la literatura latinoamericana."
         ),
         "portada": "portadas/cien-anos-de-soledad.jpg",
+        "pdf": "pdf/cien-anos-de-soledad.pdf",
     },
     {
         "titulo": "1984",
@@ -27,6 +28,7 @@ SAMPLE_BOOKS = [
             "Gran Hermano. Una de las distopías más influyentes del siglo XX."
         ),
         "portada": "portadas/1984.jpg",
+        "pdf": "pdf/1984.pdf",
     },
     {
         "titulo": "La casa de los espíritus",
@@ -39,6 +41,7 @@ SAMPLE_BOOKS = [
             "sobrenatural."
         ),
         "portada": "portadas/la-casa-de-los-espiritus.jpg",
+        "pdf": "pdf/la-casa-de-los-espiritus.pdf",
     },
     {
         "titulo": "El principito",
@@ -51,6 +54,7 @@ SAMPLE_BOOKS = [
             "ocho años y se relee a los ochenta."
         ),
         "portada": "portadas/el-principito.jpg",
+        "pdf": "pdf/el-principito.pdf",
     },
     {
         "titulo": "Fundación",
@@ -63,6 +67,7 @@ SAMPLE_BOOKS = [
             "oscuridad."
         ),
         "portada": "portadas/fundacion.jpg",
+        "pdf": "pdf/fundacion.pdf",
     },
     {
         "titulo": "Crónica de una muerte anunciada",
@@ -75,6 +80,7 @@ SAMPLE_BOOKS = [
             "con la precisión de quien ya conoce el final."
         ),
         "portada": "portadas/cronica-de-una-muerte-anunciada.jpg",
+        "pdf": "pdf/cronica-de-una-muerte-anunciada.pdf",
     },
     {
         "titulo": "Un mundo feliz",
@@ -87,6 +93,7 @@ SAMPLE_BOOKS = [
             "de la distopía sobre la felicidad obligatoria."
         ),
         "portada": "portadas/un-mundo-feliz.jpg",
+        "pdf": "pdf/un-mundo-feliz.pdf",
     },
     {
         "titulo": "El amor en los tiempos del cólera",
@@ -99,6 +106,7 @@ SAMPLE_BOOKS = [
             "espera, la distancia y el paso del tiempo."
         ),
         "portada": "portadas/el-amor-en-los-tiempos-del-colera.jpg",
+        "pdf": "pdf/el-amor-en-los-tiempos-del-colera.pdf",
     },
     {
         "titulo": "Fahrenheit 451",
@@ -111,6 +119,7 @@ SAMPLE_BOOKS = [
             "y a preguntarse si vale la pena vivir sin ideas."
         ),
         "portada": "portadas/fahrenheit-451.jpg",
+        "pdf": "",
     },
     {
         "titulo": "Don Quijote de la Mancha",
@@ -123,6 +132,20 @@ SAMPLE_BOOKS = [
             "la literatura moderna."
         ),
         "portada": "portadas/don-quijote-de-la-mancha.jpg",
+        "pdf": "pdf/don-quijote-de-la-mancha.pdf",
+    },
+    {
+        "titulo": "Frankenstein o el moderno Prometeo",
+        "autor": "Mary Shelley",
+        "genero": "Clásico",
+        "anio_publicacion": 1818,
+        "descripcion": (
+            "Victor Frankenstein da vida a una criatura que el mismo rechaza. Huida, "
+            "la criatura le exige que le fabrique una compañía, y ese rechazo desata "
+            "una de las venganzas más oscuras del siglo XIX."
+        ),
+        "portada": "",
+        "pdf": "pdf/frankenstein.pdf",
     },
 ]
 
@@ -137,8 +160,9 @@ def seed():
             book["anio_publicacion"],
             book["descripcion"],
             book["portada"],
+            book.get("pdf", ""),
         )
-    print(f"Se agregaron {len(SAMPLE_BOOKS)} libros de ejemplo con portada local.")
+    print(f"Se agregaron {len(SAMPLE_BOOKS)} libros de ejemplo con portada y PDF local.")
 
 
 if __name__ == "__main__":

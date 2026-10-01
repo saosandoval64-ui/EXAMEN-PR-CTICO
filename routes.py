@@ -11,8 +11,11 @@ web_bp = Blueprint("web", __name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
 ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
+ALLOWED_PDF_EXT = {".pdf"}
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+PDF_DIR = os.path.join(BASE_DIR, "static", "pdf")
+os.makedirs(PDF_DIR, exist_ok=True)
 
 
 def parse_year(raw_year):
@@ -52,6 +55,18 @@ def remove_image(imagen):
             os.remove(path)
 
 
+def process_pdf(request):
+    file = request.files.get("pdf_file")
+    if file and file.filename:
+        ext = os.path.splitext(file.filename)[1].lower()
+        if ext not in ALLOWED_PDF_EXT:
+            return None, "Formato de PDF no válido. Usa archivo .pdf."
+        fname = uuid.uuid4().hex + ext
+        file.save(os.path.join(PDF_DIR, fname))
+        return "pdf/" + fname, None
+    return "", None
+
+
 @web_bp.route("/")
 def index():
     search = request.args.get("q", "").strip()
@@ -71,6 +86,15 @@ def book_detail(book_id):
     return render_template("book_detail.html", book=dict(book))
 
 
+@web_bp.route("/leer/<int:book_id>")
+def read_book(book_id):
+    book = models.get_book(book_id)
+    if not book:
+        flash("El libro no existe.", "error")
+        return redirect(url_for("web.index"))
+    return render_template("read_book.html", book=dict(book))
+
+
 @web_bp.route("/nuevo", methods=["GET", "POST"])
 def add_book():
     if request.method == "POST":
@@ -80,6 +104,15 @@ def add_book():
         anio = parse_year(request.form.get("anio_publicacion"))
         descripcion = request.form.get("descripcion", "").strip()
         imagen, error = process_image(request)
+        pdf, pdf_error = process_pdf(request)
+
+        if pdf_error:
+            flash(pdf_error, "error")
+            return redirect(url_for("web.add_book"))
+
+        if error:
+            flash(error, "error")
+            return redirect(url_for("web.add_book"))
 
         if not all([titulo, autor, genero]):
             flash("Título, autor y género son obligatorios.", "error")
@@ -89,11 +122,7 @@ def add_book():
             flash("El año de publicación debe ser un número válido.", "error")
             return redirect(url_for("web.add_book"))
 
-        if error:
-            flash(error, "error")
-            return redirect(url_for("web.add_book"))
-
-        models.add_book(titulo, autor, genero, anio, descripcion, imagen)
+        models.add_book(titulo, autor, genero, anio, descripcion, imagen, pdf)
         flash("Libro agregado correctamente.", "success")
         return redirect(url_for("web.index"))
 
@@ -115,6 +144,15 @@ def edit_book(book_id):
         anio = parse_year(request.form.get("anio_publicacion"))
         descripcion = request.form.get("descripcion", "").strip()
         imagen, error = process_image(request)
+        pdf, pdf_error = process_pdf(request)
+
+        if pdf_error:
+            flash(pdf_error, "error")
+            return redirect(url_for("web.edit_book", book_id=book_id))
+
+        if error:
+            flash(error, "error")
+            return redirect(url_for("web.edit_book", book_id=book_id))
 
         if not all([titulo, autor, genero]):
             flash("Título, autor y género son obligatorios.", "error")
@@ -124,16 +162,20 @@ def edit_book(book_id):
             flash("El año de publicación debe ser un número válido.", "error")
             return redirect(url_for("web.edit_book", book_id=book_id))
 
-        if error:
-            flash(error, "error")
-            return redirect(url_for("web.edit_book", book_id=book_id))
-
         if imagen == "":
             imagen = book["imagen"]
         elif book["imagen"].startswith("uploads/"):
             remove_image(book["imagen"])
 
-        models.update_book(book_id, titulo, autor, genero, anio, descripcion, imagen)
+        if pdf and pdf != book.get("pdf", ""):
+            # Remove old PDF if exists and new one uploaded
+            old_pdf = book.get("pdf", "")
+            if old_pdf and old_pdf.startswith("pdf/"):
+                old_path = os.path.join(BASE_DIR, "static", old_pdf.lstrip("/"))
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+
+        models.update_book(book_id, titulo, autor, genero, anio, descripcion, imagen, pdf)
         flash("Libro actualizado correctamente.", "success")
         return redirect(url_for("web.index"))
 
