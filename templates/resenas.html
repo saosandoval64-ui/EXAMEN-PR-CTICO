@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Reseñas · Libroteca{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="page-head-text">
+    <h1>Reseñas de la comunidad</h1>
+    <p>
+      {{ total_reviews }} reseña{{ 's' if total_reviews != 1 else '' }}
+      {% if total_replies %}· {{ total_replies }} respuesta{{ 's' if total_replies != 1 else '' }}{% endif %}
+      {% if grupos %}en {{ grupos|length }} libro{{ 's' if grupos|length != 1 else '' }} ·
+        promedio general {{ promedio_general }}/5{% endif %}
+    </p>
+  </div>
+  <a class="btn btn--primary" href="{{ url_for('web.index') }}">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Escribir reseña
+  </a>
+</section>
+
+{% if grupos %}
+<div class="review-groups">
+  {% for grupo in grupos %}
+  <article class="review-group">
+    <header class="review-group-head">
+      <a class="review-group-cover" href="{{ url_for('web.book_detail', book_id=grupo['id']) }}"
+         title="Ver ficha de {{ grupo['titulo'] }}">
+        <div class="book-cover book-cover--{{ loop.index0 % 6 }}">
+          {% set cover_url = grupo['imagen']|image_url %}
+          {% if cover_url %}
+            <img class="book-cover-img" src="{{ cover_url }}" alt="Portada de {{ grupo['titulo'] }}"
+                 loading="lazy" onerror="this.onerror=null;this.classList.add('is-broken');">
+          {% endif %}
+          <div class="book-cover-fallback">
+            <span class="book-cover-initials">{{ initials(grupo['autor']) }}</span>
+            <span class="book-cover-title">{{ grupo['titulo'] }}</span>
+          </div>
+        </div>
+      </a>
+      <div class="review-group-info">
+        <h2>
+          <a href="{{ url_for('web.book_detail', book_id=grupo['id']) }}">{{ grupo['titulo'] }}</a>
+        </h2>
+        <p class="review-group-author">por {{ grupo['autor'] }}</p>
+        <p class="review-group-stats">
+          <span class="stars" aria-label="Calificación promedio {{ grupo['promedio'] }} de 5">
+            {% for i in range(1, 6) %}
+              <span class="star {{ 'star--on' if i <= grupo['promedio']|round(0, 'floor')|int else '' }}">★</span>
+            {% endfor %}
+          </span>
+          <span class="review-group-average">{{ grupo['promedio'] }}/5</span>
+          <span class="review-group-count">· {{ grupo['total'] }} reseña{{ 's' if grupo['total'] != 1 else '' }}</span>
+        </p>
+      </div>
+      <a class="btn btn--ghost" href="{{ url_for('web.book_detail', book_id=grupo['id']) }}#resenas">Ver libro</a>
+    </header>
+
+    <ul class="review-list">
+      {% for review in grupo['reseñas'] %}
+      <li class="review-item">
+        <div class="review-item-head">
+          <span class="review-avatar">{{ initials(review['autor_nombre']) }}</span>
+          <div>
+            <p class="review-author">{{ review['autor_nombre'] }}</p>
+            <p class="review-date">{{ review['creado_en'][:10] }}</p>
+          </div>
+          <span class="stars stars--sm" aria-label="Calificación {{ review['calificacion'] }} de 5">
+            {% for i in range(1, 6) %}
+              <span class="star {{ 'star--on' if i <= review['calificacion'] }}">★</span>
+            {% endfor %}
+          </span>
+        </div>
+        {% if review['titulo'] %}
+          <h3 class="review-title">{{ review['titulo'] }}</h3>
+        {% endif %}
+        <p class="review-text">{{ review['texto'] }}</p>
+
+        {% if review['respuestas'] %}
+        <ul class="reply-list">
+          {% for reply in review['respuestas'] %}
+          <li class="reply-item">
+            <span class="review-avatar review-avatar--sm">{{ initials(reply['autor_nombre']) }}</span>
+            <div class="reply-body">
+              <p class="reply-head">
+                <strong>{{ reply['autor_nombre'] }}</strong>
+                <span class="reply-date">{{ reply['creado_en'][:10] }}</span>
+              </p>
+              <p class="review-text">{{ reply['texto'] }}</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <h2>Todavía no hay reseñas</h2>
+  <p>Abre la ficha de un libro y cuéntanos qué te pareció.</p>
+  <a class="btn btn--primary" href="{{ url_for('web.index') }}">Ir al catálogo</a>
+</div>
+{% endif %}
+{% endblock %}

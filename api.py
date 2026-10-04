@@ -19,6 +19,7 @@ def row_to_dict(row):
         "descripcion": row["descripcion"],
         "imagen": row["imagen"],
         "pdf": row["pdf"],
+        "lecturas": row["lecturas"],
         "favorito": bool(row["favorito"]),
     }
 

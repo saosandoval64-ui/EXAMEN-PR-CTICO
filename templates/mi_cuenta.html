@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Mi cuenta · Libroteca{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="page-head-text">
+    <h1>Mi cuenta</h1>
+    <p>
+      Aquí queda guardado todo lo tuyo: los favoritos que marcas, las reseñas que
+      escribes y los libros que subes.
+    </p>
+  </div>
+  <a class="btn btn--primary" href="{{ url_for('web.add_book') }}">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Subir libro
+  </a>
+</section>
+
+<section class="profile-card">
+  <span class="profile-avatar">{{ initials(user['nombre']) }}</span>
+  <div class="profile-info">
+    <h2>{{ user['nombre'] }}</h2>
+    <p class="profile-mail">{{ user['correo'] }}</p>
+    <p class="profile-tags">
+      {% if user['es_admin'] %}<span class="tag tag--admin">Administradora</span>{% endif %}
+      {% if user['verificado'] %}
+        <span class="tag tag--ok">Correo verificado</span>
+      {% else %}
+        <span class="tag tag--warn">Correo sin verificar</span>
+      {% endif %}
+      {% if user['google_id'] %}<span class="tag">Cuenta de Google</span>{% endif %}
+    </p>
+  </div>
+  <div class="profile-stats">
+    <div class="stat">
+      <span class="stat-value">{{ stats.favoritos }}</span>
+      <span class="stat-label">Favoritos</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.resenas }}</span>
+      <span class="stat-label">Reseñas</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.respuestas }}</span>
+      <span class="stat-label">Respuestas</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.libros }}</span>
+      <span class="stat-label">Libros subidos</span>
+    </div>
+  </div>
+</section>
+
+<section class="profile-block">
+  <header class="section-head">
+    <h2>Mis favoritos</h2>
+    <a class="cta-link" href="{{ url_for('web.index') }}">Marcar más en el catálogo</a>
+  </header>
+  {% if favoritos %}
+    <div class="book-grid">
+      {% for book in favoritos %}
+      <article class="book-card">
+        <a class="book-card-main" href="{{ url_for('web.book_detail', book_id=book['id']) }}">
+          <div class="book-cover book-cover--{{ loop.index0 % 6 }}">
+            {% set cover_url = book['imagen']|image_url %}
+            {% if cover_url %}
+              <img class="book-cover-img" src="{{ cover_url }}" alt="Portada de {{ book['titulo'] }}"
+                   loading="lazy" onerror="this.onerror=null;this.classList.add('is-broken');">
+            {% endif %}
+            <div class="book-cover-fallback">
+              <span class="book-cover-initials">{{ initials(book['autor']) }}</span>
+              <span class="book-cover-title">{{ book['titulo'] }}</span>
+            </div>
+            <span class="book-genre">{{ book['genero'] }}</span>
+          </div>
+          <div class="book-card-body">
+            <h3 class="book-title">{{ book['titulo'] }}</h3>
+            <p class="book-author">por {{ book['autor'] }}</p>
+          </div>
+        </a>
+        <div class="book-card-foot">
+          <span class="book-year">{{ book['anio_publicacion'] }}</span>
+          <form method="post" action="{{ url_for('web.like_book', book_id=book['id']) }}" data-like="{{ book['id'] }}">
+            <button type="submit" class="like-btn like-btn--on" aria-pressed="true">
+              <svg class="like-heart like-heart--on" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23c.29-.29.57-.57.91-.95l1.06-1.05 6.87-6.86 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span class="like-text">Favorito</span>
+            </button>
+          </form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state empty-state--compact">
+      <h3>Aún no marcas favoritos</h3>
+      <p>Pulsa «Me gusta» en cualquier ficha y aparecerá aquí.</p>
+      <a class="btn btn--primary" href="{{ url_for('web.index') }}">Ir al catálogo</a>
+    </div>
+  {% endif %}
+</section>
+
+<section class="profile-block">
+  <header class="section-head">
+    <h2>Mis reseñas y respuestas</h2>
+    <a class="cta-link" href="{{ url_for('web.resenas') }}">Ver todas las reseñas</a>
+  </header>
+  {% if resenas %}
+    <ul class="review-list">
+      {% for review in resenas %}
+      <li class="review-item">
+        <div class="review-item-head">
+          <span class="review-avatar">{{ initials(review['autor_nombre']) }}</span>
+          <div>
+            <p class="review-author">{{ review['autor_nombre'] }}</p>
+            <p class="review-date">
+              {% if review['respuesta_a'] %}
+                Respondió a una reseña en
+              {% else %}
+                Reseñó
+              {% endif %}
+              <a class="cta-link" href="{{ url_for('web.book_detail', book_id=review['libro_id']) }}">{{ review['libro_titulo'] }}</a>
+              · {{ review['creado_en'][:10] }}
+            </p>
+          </div>
+          {% if not review['respuesta_a'] %}
+            <span class="stars stars--sm" aria-label="Calificación {{ review['calificacion'] }} de 5">
+              {% for i in range(1, 6) %}
+                <span class="star {{ 'star--on' if i <= review['calificacion'] }}">★</span>
+              {% endfor %}
+            </span>
+          {% endif %}
+        </div>
+        {% if review['titulo'] %}<h3 class="review-title">{{ review['titulo'] }}</h3>{% endif %}
+        <p class="review-text">{{ review['texto'] }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state empty-state--compact">
+      <h3>Todavía no has escrito reseñas</h3>
+      <p>Abre la ficha de un libro y cuéntanos qué te pareció.</p>
+      <a class="btn btn--primary" href="{{ url_for('web.index') }}">Buscar un libro</a>
+    </div>
+  {% endif %}
+</section>
+
+<section class="profile-block">
+  <header class="section-head">
+    <h2>Mis libros subidos</h2>
+    <a class="cta-link" href="{{ url_for('web.add_book') }}">Subir otro</a>
+  </header>
+  {% if libros %}
+    <ul class="review-list">
+      {% for book in libros %}
+      <li class="review-item review-item--row">
+        <div class="review-item-head">
+          <span class="review-avatar">{{ initials(book['titulo']) }}</span>
+          <div>
+            <p class="review-author">{{ book['titulo'] }}</p>
+            <p class="review-date">
+              por {{ book['autor'] }} · {{ book['genero'] }} · {{ book['anio_publicacion'] }}
+              {% if book['pdf'] %} · con PDF{% else %} · sin PDF{% endif %}
+            </p>
+          </div>
+          <a class="btn btn--ghost" href="{{ url_for('web.book_detail', book_id=book['id']) }}">Ver ficha</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state empty-state--compact">
+      <h3>No has subido libros</h3>
+      <p>Si encuentras un libro que falta, puedes añadirlo con su portada y su PDF.</p>
+      <a class="btn btn--primary" href="{{ url_for('web.add_book') }}">Subir libro</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

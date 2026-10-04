@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Verifica tu correo · Libroteca{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="page-head-text">
+    <h1>Verifica tu correo</h1>
+    <p>Escribe el código de 6 dígitos que te enviamos para confirmar tu cuenta.</p>
+  </div>
+</section>
+
+<div class="auth-wrap auth-wrap--single">
+  <form class="form-card form-section" method="post" action="{{ url_for('auth.verify') }}">
+    <h2 class="form-section-title">Código de verificación</h2>
+
+    <div class="field">
+      <label for="codigo">Código</label>
+      <input type="text" id="codigo" name="codigo" inputmode="numeric" pattern="[0-9]{6}"
+             maxlength="6" required placeholder="000000" autocomplete="one-time-code"
+             class="code-input">
+    </div>
+
+    <button type="submit" class="btn btn--primary btn--block">Verificar correo</button>
+  </form>
+
+  <div class="auth-card">
+    <h2 class="form-section-title">¿No llegó el código?</h2>
+    <p class="auth-card-text">
+      Revisa la carpeta de spam. Si sigue sin aparecer, pídelo otra vez: puedes
+      solicitar uno nuevo por minuto.
+    </p>
+    <form method="post" action="{{ url_for('auth.resend_code') }}">
+      <button type="submit" class="btn btn--ghost btn--block">Reenviar código</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

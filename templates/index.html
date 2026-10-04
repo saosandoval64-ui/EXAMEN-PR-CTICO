@@ -14,7 +14,8 @@
       <p>
         {{ books|length }} libro{{ 's' if books|length != 1 else '' }} en la biblioteca ·
         <span data-fav-count>{{ fav_count }}</span>
-        favorito{{ 's' if fav_count != 1 else '' }}
+        favorito{{ 's' if fav_count != 1 else '' }} ·
+        <a class="cta-link" href="{{ url_for('web.resenas') }}">{{ review_count }} reseña{{ 's' if review_count != 1 else '' }}</a>
       </p>
     {% endif %}
   </div>
@@ -23,6 +24,40 @@
     Agregar libro
   </a>
 </section>
+
+{% if top_books and not search %}
+<section class="top-read">
+  <header class="section-head">
+    <h2>Más leídos</h2>
+    <a class="cta-link" href="{{ url_for('web.resenas') }}">Ver todas las reseñas</a>
+  </header>
+  <div class="top-read-grid">
+    {% for book in top_books %}
+    <a class="top-read-card" href="{{ url_for('web.book_detail', book_id=book['id']) }}">
+      <div class="book-cover book-cover--{{ loop.index0 % 6 }}">
+        {% set cover_url = book['imagen']|image_url %}
+        {% if cover_url %}
+          <img class="book-cover-img" src="{{ cover_url }}" alt="Portada de {{ book['titulo'] }}"
+               loading="lazy" onerror="this.onerror=null;this.classList.add('is-broken');">
+        {% endif %}
+        <div class="book-cover-fallback">
+          <span class="book-cover-initials">{{ initials(book['autor']) }}</span>
+          <span class="book-cover-title">{{ book['titulo'] }}</span>
+        </div>
+      </div>
+      <div class="top-read-body">
+        <h3 class="book-title">{{ book['titulo'] }}</h3>
+        <p class="book-author">por {{ book['autor'] }}</p>
+        <p class="top-read-count">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          {{ book['lecturas'] }} lectura{{ 's' if book['lecturas'] != 1 else '' }}
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 {% if books %}
 <div class="book-grid">

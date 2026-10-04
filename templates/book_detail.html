@@ -77,4 +77,144 @@
     </div>
   </div>
 </section>
+
+<section class="reviews" id="resenas">
+  <div class="reviews-head">
+    <h2>Reseñas</h2>
+    {% if review_total %}
+      <p class="reviews-summary">
+        <span class="stars" aria-label="Calificación promedio {{ review_promedio }} de 5">
+          {% for i in range(1, 6) %}
+            <span class="star {{ 'star--on' if i <= review_promedio|round(0, 'floor')|int else '' }}">★</span>
+          {% endfor %}
+        </span>
+        {{ review_promedio }}/5 · {{ review_total }} reseña{{ 's' if review_total != 1 else '' }}
+        {% if reply_total %}· {{ reply_total }} respuesta{{ 's' if reply_total != 1 else '' }}{% endif %}
+      </p>
+    {% endif %}
+  </div>
+
+  <form class="review-form" method="post" action="{{ url_for('web.add_review', book_id=book['id']) }}">
+    {% if user %}
+      <p class="review-form-who">
+        Reseña de <strong>{{ user['nombre'] }}</strong>
+      </p>
+    {% else %}
+      <div class="field">
+        <label for="autor_nombre">Tu nombre</label>
+        <input type="text" id="autor_nombre" name="autor_nombre" required placeholder="Ana Pérez">
+        <p class="field-hint">
+          <a class="cta-link" href="{{ url_for('auth.login') }}">Inicia sesión</a> para que tu
+          reseña quede firmada con tu cuenta.
+        </p>
+      </div>
+    {% endif %}
+
+    <div class="field">
+      <label for="calificacion">Calificación</label>
+      <select id="calificacion" name="calificacion">
+        <option value="5">★★★★★ Excelente</option>
+        <option value="4">★★★★☆ Muy bueno</option>
+        <option value="3">★★★☆☆ Aceptable</option>
+        <option value="2">★★☆☆☆ Regular</option>
+        <option value="1">★☆☆☆☆ Mal</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="titulo_resena">Título <span class="field-optional">(opcional)</span></label>
+      <input type="text" id="titulo_resena" name="titulo" placeholder="Un resumen en una línea">
+    </div>
+
+    <div class="field">
+      <label for="texto_resena">Tu reseña</label>
+      <textarea id="texto_resena" name="texto" required minlength="10"
+                placeholder="¿Qué te gustó? ¿Qué no te.convirtió? Sé honesto, ayuda a otros lectores."></textarea>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Publicar reseña</button>
+  </form>
+
+  {% if reviews %}
+    <ul class="review-list">
+      {% for review in reviews %}
+      <li class="review-item" id="resena-{{ review['id'] }}">
+        <div class="review-item-head">
+          <span class="review-avatar">{{ initials(review['autor_nombre']) }}</span>
+          <div>
+            <p class="review-author">{{ review['autor_nombre'] }}</p>
+            <p class="review-date">{{ review['creado_en'][:10] }}</p>
+          </div>
+          <span class="stars stars--sm" aria-label="Calificación {{ review['calificacion'] }} de 5">
+            {% for i in range(1, 6) %}
+              <span class="star {{ 'star--on' if i <= review['calificacion'] }}">★</span>
+            {% endfor %}
+          </span>
+        </div>
+        {% if review['titulo'] %}
+          <h3 class="review-title">{{ review['titulo'] }}</h3>
+        {% endif %}
+        <p class="review-text">{{ review['texto'] }}</p>
+
+        <div class="review-actions">
+          <button type="button" class="review-reply-toggle" data-reply-for="resena-{{ review['id'] }}"
+                  aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-5a8.4 8.4 0 0 1-.9-4 8.4 8.4 0 0 1 8.4-9 8.4 8.4 0 0 1 8.6 8.5z"/></svg>
+            {% if review['respuestas'] %}
+              {{ review['respuestas']|length }} respuesta{{ 's' if review['respuestas']|length != 1 else '' }}
+            {% else %}
+              Responder
+            {% endif %}
+          </button>
+          {% if user and (user['id'] == review['usuario_id'] or user['es_admin']) %}
+            <form method="post" action="{{ url_for('web.delete_review', book_id=book['id'], review_id=review['id']) }}"
+                  data-confirm="¿Eliminar esta reseña y sus respuestas?">
+              <button type="submit" class="review-delete" aria-label="Eliminar reseña" title="Eliminar reseña">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </form>
+          {% endif %}
+        </div>
+
+        {% if review['respuestas'] %}
+        <ul class="reply-list">
+          {% for reply in review['respuestas'] %}
+          <li class="reply-item">
+            <span class="review-avatar review-avatar--sm">{{ initials(reply['autor_nombre']) }}</span>
+            <div class="reply-body">
+              <p class="reply-head">
+                <strong>{{ reply['autor_nombre'] }}</strong>
+                <span class="reply-date">{{ reply['creado_en'][:10] }}</span>
+              </p>
+              <p class="review-text">{{ reply['texto'] }}</p>
+            </div>
+            {% if user and (user['id'] == reply['usuario_id'] or user['es_admin']) %}
+              <form method="post" action="{{ url_for('web.delete_review', book_id=book['id'], review_id=reply['id']) }}"
+                    data-confirm="¿Eliminar esta respuesta?">
+                <button type="submit" class="review-delete" aria-label="Eliminar respuesta" title="Eliminar respuesta">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form class="reply-form" id="resena-{{ review['id'] }}" method="post" hidden
+              action="{{ url_for('web.reply_review', book_id=book['id'], review_id=review['id']) }}">
+          {% if not user %}
+            <input type="text" name="autor_nombre" class="reply-name" placeholder="Tu nombre" required>
+          {% endif %}
+          <input type="text" name="texto" class="reply-input" required minlength="3"
+                 placeholder="{{ 'Escribe una respuesta…' if user else 'Responde con tu nombre…' }}">
+          <button type="submit" class="btn btn--ghost btn--sm">Responder</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="detail-muted">Este libro todavía no tiene reseñas. ¿Eres la primera persona en opinar?</p>
+  {% endif %}
+</section>
 {% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Administración · Libroteca{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="page-head-text">
+    <h1>Panel de administración</h1>
+    <p>Controla las cuentas, modera los libros del catálogo y limpia las reseñas.</p>
+  </div>
+  <a class="btn btn--ghost" href="{{ url_for('web.index') }}">Volver al catálogo</a>
+</section>
+
+<section class="admin-stats">
+  <div class="stat"><span class="stat-value">{{ stats.libros }}</span><span class="stat-label">Libros</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.usuarios }}</span><span class="stat-label">Cuentas</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.verificados }}</span><span class="stat-label">Verificados</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.bloqueados }}</span><span class="stat-label">Bloqueados</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.resenas }}</span><span class="stat-label">Reseñas</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.respuestas }}</span><span class="stat-label">Respuestas</span></div>
+</section>
+
+<section class="admin-block" id="cuentas">
+  <header class="section-head">
+    <h2>Cuentas</h2>
+    <p class="section-sub">Bloquea cuentas que rompen los términos o elimina las que ya no se usan.</p>
+  </header>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Correo</th>
+          <th>Estado</th>
+          <th>Actividad</th>
+          <th class="ta-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+          <td>
+            <span class="cell-user">
+              <span class="review-avatar">{{ initials(usuario['nombre']) }}</span>
+              {{ usuario['nombre'] }}
+              {% if usuario['es_admin'] %}<span class="tag tag--admin">admin</span>{% endif %}
+            </span>
+          </td>
+          <td class="cell-mail">{{ usuario['correo'] }}</td>
+          <td>
+            {% if usuario['bloqueado'] %}
+              <span class="tag tag--warn">Bloqueada</span>
+            {% elif usuario['verificado'] %}
+              <span class="tag tag--ok">Verificada</span>
+            {% else %}
+              <span class="tag">Sin verificar</span>
+            {% endif %}
+            {% if usuario['google_id'] %}<span class="tag">Google</span>{% endif %}
+          </td>
+          <td class="cell-num">
+            {{ usuario['total_resenas'] }} reseña{{ 's' if usuario['total_resenas'] != 1 else '' }} ·
+            {{ usuario['total_libros'] }} libro{{ 's' if usuario['total_libros'] != 1 else '' }}
+          </td>
+          <td class="ta-right">
+            <div class="row-actions">
+              {% if usuario['id'] != current_user['id'] %}
+                <form method="post" action="{{ url_for('web.admin_block_user', user_id=usuario['id']) }}">
+                  <button type="submit" class="btn btn--ghost btn--sm">
+                    {{ 'Desbloquear' if usuario['bloqueado'] else 'Bloquear' }}
+                  </button>
+                </form>
+                <form method="post" action="{{ url_for('web.admin_delete_user', user_id=usuario['id']) }}"
+                      data-confirm="¿Eliminar la cuenta de {{ usuario['nombre'] }}? Se borran sus reseñas y favoritos.">
+                  <button type="submit" class="btn btn--danger btn--sm">Eliminar</button>
+                </form>
+              {% else %}
+                <span class="cell-muted">tu cuenta</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-block" id="catalogo">
+  <header class="section-head">
+    <h2>Catálogo</h2>
+    <p class="section-sub">Elimina los libros que no cumplen los términos: contenido duplicado, sin información o con datos erróneos.</p>
+  </header>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Libro</th>
+          <th>Autor</th>
+          <th>Año</th>
+          <th>PDF</th>
+          <th>Lecturas</th>
+          <th class="ta-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in libros %}
+        <tr>
+          <td>
+            <a class="cell-link" href="{{ url_for('web.book_detail', book_id=book['id']) }}">{{ book['titulo'] }}</a>
+          </td>
+          <td>{{ book['autor'] }}</td>
+          <td class="cell-num">{{ book['anio_publicacion'] }}</td>
+          <td>{% if book['pdf'] %}<span class="tag tag--ok">Sí</span>{% else %}<span class="tag tag--warn">No</span>{% endif %}</td>
+          <td class="cell-num">{{ book['lecturas'] }}</td>
+          <td class="ta-right">
+            <div class="row-actions">
+              <a class="btn btn--ghost btn--sm" href="{{ url_for('web.edit_book', book_id=book['id']) }}">Editar</a>
+              <form method="post" action="{{ url_for('web.admin_delete_book', book_id=book['id']) }}"
+                    data-confirm="¿Eliminar «{{ book['titulo'] }}» del catálogo?">
+                <button type="submit" class="btn btn--danger btn--sm">Eliminar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-block" id="moderacion">
+  <header class="section-head">
+    <h2>Reseñas y respuestas</h2>
+    <p class="section-sub">Quita comentarios con insults, spam o contenido que no corresponde a un libro.</p>
+  </header>
+
+  {% if resenas %}
+    <ul class="review-list">
+      {% for review in resenas %}
+      <li class="review-item review-item--row">
+        <div class="review-item-head">
+          <span class="review-avatar">{{ initials(review['autor_nombre']) }}</span>
+          <div>
+            <p class="review-author">{{ review['autor_nombre'] }}</p>
+            <p class="review-date">
+              {% if review['respuesta_a'] %}
+                Respuesta en
+              {% else %}
+                Reseña de
+              {% endif %}
+              <a class="cta-link" href="{{ url_for('web.book_detail', book_id=review['libro_id']) }}">{{ review['libro_titulo'] }}</a>
+              · {{ review['creado_en'][:10] }}
+            </p>
+          </div>
+          <form method="post" action="{{ url_for('web.admin_delete_review', review_id=review['id']) }}"
+                data-confirm="¿Eliminar esta publicación?">
+            <button type="submit" class="btn btn--danger btn--sm">Eliminar</button>
+          </form>
+        </div>
+        {% if review['titulo'] %}<h3 class="review-title">{{ review['titulo'] }}</h3>{% endif %}
+        <p class="review-text">{{ review['texto'] }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state empty-state--compact">
+      <h3>No hay reseñas publicadas</h3>
+      <p>Cuando los lectores opinen, aquí podrás moderarlas.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
